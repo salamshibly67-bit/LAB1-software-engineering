@@ -104,7 +104,7 @@ public class UserApp {
                 Pattern.compile("^[A-Za-z0-9._%+-]+@[A-Za-z0-9][A-Za-z0-9.-]*\\.[A-Za-z]{2,}$");
 
         // symbols from the number row of the keyboard
-        private static final String SYMBOLS = "!@#$%^&*()_+-=~`";
+        private static final String SYMBOLS = "!@#$%^&*()_+-=";
         private static final Pattern PASSWORD_ALLOWED =
                 Pattern.compile("^[A-Za-z0-9" + Pattern.quote(SYMBOLS) + "]+$");
 
