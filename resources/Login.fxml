@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.VBox?>
+
+
+<VBox xmlns:fx="http://javafx.com/fxml"
+      fx:controller="LoginController"
+      alignment="CENTER"
+      spacing="15"
+      prefWidth="400"
+      prefHeight="300">
+
+    <padding>
+        <Insets top="25" right="35" bottom="25" left="35"/>
+    </padding>
+
+    <Label text="GCM Login"
+           style="-fx-font-size: 24px; -fx-font-weight: bold;"/>
+
+    <TextField fx:id="usernameField"
+               promptText="Username"/>
+
+    <PasswordField fx:id="passwordField"
+                   promptText="Password"/>
+
+
+    <Button text="Login"
+            fx:id="loginButton"
+            onAction="#handleLogin"/>
+
+    <Label fx:id="errorLabel"
+           textFill="red"
+           wrapText="true"/>
+
+</VBox>

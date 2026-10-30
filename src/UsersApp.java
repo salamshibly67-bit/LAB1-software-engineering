@@ -60,6 +60,56 @@ public class UsersApp {
         }
     }
 
+
+
+
+    /**
+     * Reads the input file and returns only valid users.
+     * Invalid entries are skipped and reported.
+     */
+    public static ArrayList<User> loadUsers(String fileName) {
+
+        ArrayList<User> users = new ArrayList<>();
+
+        try (Scanner reader = new Scanner(new File(fileName))) {
+
+            while (reader.hasNextLine()) {
+
+                String line = reader.nextLine();
+
+                if (line.trim().isEmpty()) {
+                    continue;
+                }
+
+                String[] parts = line.trim().split("\\s+");
+
+                String username = parts[0];
+                String password = (parts.length == 2)
+                        ? parts[1] : null;
+
+                try {
+                    if (password == null) {
+                        throw new IllegalArgumentException(
+                                User.INVALID_PASSWORD
+                        );
+                    }
+
+                    users.add(new User(username, password));
+
+                } catch (IllegalArgumentException e) {
+                    printError(line, e.getMessage());
+                }
+            }
+
+        } catch (FileNotFoundException e) {
+            System.err.println("Cannot open file: " + fileName);
+        }
+
+        return users;
+    }
+
+
+
     /**
      * Prints an invalid line and its error message on one line to the error
      * stream, so that only the valid users are written to the output file.
