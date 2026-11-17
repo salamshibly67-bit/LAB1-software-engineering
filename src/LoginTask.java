@@ -53,13 +53,9 @@ public class LoginTask implements Runnable {
     }
 
 
+
     private LoginResult performLogin()
             throws InterruptedException {
-
-        // Unknown emails are never tracked.
-        if (!authService.emailExists(email)) {
-            return LoginResult.error(-1);
-        }
 
         // Serialize complete login operations for the same email.
         var loginLock = tracker.getLoginLock(email);
@@ -67,12 +63,13 @@ public class LoginTask implements Runnable {
         loginLock.lockInterruptibly();
 
         try {
-            // Check blocking status in a separate Thread.
+            // Step 1: Check blocking status in a separate thread.
             BlockCheckThread checker =
                     new BlockCheckThread(tracker, email);
 
             checker.start();
 
+            // Wait for BlockCheckThread to finish.
             try {
                 checker.join();
             } catch (InterruptedException e) {
@@ -80,12 +77,18 @@ public class LoginTask implements Runnable {
                 throw e;
             }
 
+            // Step 2: Reject immediately if blocked.
             if (checker.isAccountBlocked()) {
                 return LoginResult.blocked(
                         checker.getRemainingSeconds());
             }
 
-            // Authenticate using the existing service.
+            // Step 3: Unknown emails receive a generic error.
+            if (!authService.emailExists(email)) {
+                return LoginResult.error(-1);
+            }
+
+            // Step 4: Authenticate using the existing service.
             boolean valid;
 
             try {
@@ -94,22 +97,25 @@ public class LoginTask implements Runnable {
                 valid = false;
             }
 
+            // Step 5: Successful login resets the counter.
             if (valid) {
                 tracker.reset(email);
                 return LoginResult.success();
             }
 
-            // Submit an incorrect-password event.
+            // Step 6: Send a failed attempt to FailureWorker.
             FailedAttempt attempt = new FailedAttempt(email);
 
             failureQueue.put(attempt);
 
-            // Wait for the worker response.
+            // Wait for the worker to return the result.
             return attempt.waitForResponse();
 
         } finally {
+            // Always release the lock.
             loginLock.unlock();
         }
     }
+
 
 }
