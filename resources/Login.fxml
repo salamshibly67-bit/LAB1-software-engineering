@@ -30,6 +30,10 @@
             fx:id="loginButton"
             onAction="#handleLogin"/>
 
+    <Button fx:id="testButton"
+            text="Run Concurrency Test"
+            onAction="#handleConcurrencyTest"/>
+
     <Label fx:id="errorLabel"
            textFill="red"
            wrapText="true"/>

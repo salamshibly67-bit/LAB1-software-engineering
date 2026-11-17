@@ -13,6 +13,8 @@ import java.util.ArrayList;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
+import javafx.application.Platform;
+import javafx.scene.control.Alert;
 
 public class LoginController {
 
@@ -24,6 +26,9 @@ public class LoginController {
 
     @FXML
     private Button loginButton;
+
+    @FXML
+    private Button testButton;
 
     @FXML
     private Label errorLabel;
@@ -171,6 +176,7 @@ public class LoginController {
         usernameField.setDisable(disabled);
         passwordField.setDisable(disabled);
         loginButton.setDisable(disabled);
+        testButton.setDisable(disabled);
     }
 
     // Open the existing Lab 2 Welcome screen.
@@ -195,6 +201,65 @@ public class LoginController {
             e.printStackTrace();
         }
     }
+
+
+    @FXML
+    private void handleConcurrencyTest() {
+
+        if (closed || testButton.isDisabled()) {
+            return;
+        }
+
+        // Keep the interface responsive during the test.
+        setInputsDisabled(true);
+        testButton.setDisable(true);
+        errorLabel.setText("Running concurrency test...");
+
+        Thread testThread = new Thread(() -> {
+
+            String output;
+
+            try {
+                output = ConcurrencyTest.runTest();
+
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                return;
+
+            } catch (Exception e) {
+                output = "Test failed: " + e.getMessage();
+            }
+
+            String finalOutput = output;
+
+            Platform.runLater(() -> {
+
+                if (closed) {
+                    return;
+                }
+
+                setInputsDisabled(false);
+                testButton.setDisable(false);
+                errorLabel.setText("");
+
+                Alert alert = new Alert(
+                        Alert.AlertType.INFORMATION);
+
+                alert.setTitle("Concurrency Test");
+                alert.setHeaderText("20-Thread Test Results");
+                alert.setContentText(finalOutput);
+                alert.setResizable(true);
+                alert.getDialogPane().setPrefWidth(550);
+                alert.show();
+            });
+
+        }, "ConcurrencyTestRunner");
+
+        testThread.setDaemon(true);
+        loginThreads.add(testThread);
+        testThread.start();
+    }
+
 
     // Stop background tasks when the window closes.
     public void shutdown() {

@@ -57,7 +57,7 @@ public class UserState {
     }
 
 
-    public synchronized LoginResult processFailure(
+    public synchronized  LoginResult processFailure(
             int maxAttempts, int blockDurationSeconds) {
 
         long now = System.currentTimeMillis();
